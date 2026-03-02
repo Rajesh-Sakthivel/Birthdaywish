@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Surprise ✨</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#ffd6e8,#c8f0ff);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+}
+.box{
+  background:white;
+  padding:30px 25px;
+  border-radius:20px;
+  width:90%;
+  max-width:350px;
+  text-align:center;
+  box-shadow:0 15px 30px rgba(0,0,0,0.15);
+  position:relative;
+  opacity:0;
+  transform:translateY(20px) scale(0.95);
+  transition:all 0.6s ease;
+}
+.show{opacity:1; transform:translateY(0) scale(1);}
+.hidden{display:none;}
+h2{margin-bottom:15px;color:#ff5e99;font-size:20px;}
+input{width:100%;padding:12px;margin:10px 0;border-radius:12px;border:1px solid #ddd;font-size:16px;}
+button{width:100%;padding:12px;background:#ff5e99;color:white;border:none;border-radius:12px;font-size:16px;cursor:pointer;margin-top:10px;transition:0.3s ease;}
+button:active{transform:scale(0.95);}
+img{width:100%;border-radius:15px;margin-bottom:20px;}
+.error{color:red;font-size:14px;margin-top:10px;}
+.bigHi{font-size:50px;color:#ff5e99;animation: popIn 1s ease forwards;}
+.subText{margin-top:10px;font-size:18px;opacity:0;animation: fadeIn 2s ease forwards;animation-delay:1s;}
+@keyframes popIn{0%{transform:scale(0);}70%{transform:scale(1.2);}100%{transform:scale(1);}}
+@keyframes fadeIn{to{opacity:1;}}
+.emoji-bg{position:fixed;width:100%;height:100%;top:0;left:0;pointer-events:none;overflow:hidden;z-index:0;}
+.emoji{position:absolute;font-size:25px;animation-timing-function: linear;}
+#gameArea{width:100%;height:250px;position:relative;background:#f0f8ff;border-radius:15px;overflow:hidden;margin-bottom:15px;}
+#basket{position:absolute;bottom:0;width:60px;height:60px;background:#ff5e99;border-radius:10px;display:flex;justify-content:center;align-items:center;color:white;font-size:30px;touch-action:none;}
+.star{position:absolute;font-size:30px;user-select:none;}
+#gameMsg{margin-top:10px;color:#ff5e99;font-weight:bold;}
+#pishBox p{min-height:60px;}
+/* Fireworks & Confetti */
+.firework, .confetti{
+  position:absolute;
+  pointer-events:none;
+  z-index:5;
+}
+.firework{
+  width:5px;
+  height:5px;
+  background:yellow;
+  border-radius:50%;
+  animation: explode 1s ease-out forwards;
+}
+@keyframes explode{
+  0%{transform:translate(0,0) scale(1); opacity:1;}
+  100%{transform:translate(var(--x), var(--y)) scale(2); opacity:0;}
+}
+.confetti{
+  width:8px;
+  height:8px;
+  background:var(--color,#f00);
+  transform:rotate(45deg);
+  animation: fall 3s linear forwards;
+}
+@keyframes fall{
+  0%{transform:translateY(0) rotate(0deg);}
+  100%{transform:translateY(100vh) rotate(360deg);}
+}
+/* Popper background wrapper */
+#popperWrapper{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+
+#popperText{
+  padding:40px 60px;
+  background: linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);
+  border-radius:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  text-align:center;
+}
+
+#finalImage{
+  width:95vw;
+  max-width:800px;
+  height:auto;
+  border-radius:25px;
+  display:block;
+}
+
+/* ---------------- CAKE PAGE ---------------- */
+#cakePage{
+  position:fixed;
+  top:0;left:0;
+  width:100vw;height:100vh;
+  background:linear-gradient(180deg,#fff0f5,#ffe4f0);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:20;
+}
+
+.cake{position:relative;width:220px;height:180px;}
+.layer{
+  position:absolute;width:220px;height:60px;
+  background:linear-gradient(#ff85a2,#ff5e99);
+  border-radius:15px;
+  box-shadow:0 8px 15px rgba(0,0,0,0.2);
+}
+.layer1{bottom:0;}
+.layer2{bottom:50px;width:190px;left:15px;}
+.layer3{bottom:100px;width:160px;left:30px;}
+
+.icing{
+  position:absolute;width:100%;height:25px;
+  background:white;top:-15px;border-radius:50%;
+}
+
+.candle{position:absolute;width:10px;height:40px;background:#fff;top:-50px;left:105px;}
+.flame{
+  position:absolute;width:15px;height:20px;
+  background:radial-gradient(circle,#ff0,#ff4500);
+  border-radius:50%;top:-20px;left:-2px;
+  animation:flicker 0.2s infinite alternate;
+}
+@keyframes flicker{
+  from{transform:scale(1);}
+  to{transform:scale(1.2);}
+}
+
+.break .layer1{
+  animation: cutLeft 1s forwards;
+}
+.break .layer2{
+  animation: cutRight 1s forwards;
+}
+.break .layer3{
+  animation: cutTop 1s forwards;
+}
+
+@keyframes cutLeft{
+  to{
+    transform: translateX(-40px) rotate(-8deg);
+  }
+}
+
+@keyframes cutRight{
+  to{
+    transform: translateX(40px) rotate(8deg);
+  }
+}
+
+@keyframes cutTop{
+  to{
+    transform: translateY(-20px);
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="emoji-bg" id="emojiBg"></div>
+
+<!-- LOGIN -->
+<div class="box show" id="loginBox">
+  <h2>✨ Welcome ✨</h2>
+  <input type="text" id="username" placeholder="🧑 Enter Username">
+  <input type="password" id="password" placeholder="🔐 Pass: Your fav gvm movie">
+  <button onclick="login()">Unlock ✨</button>
+  <p class="error" id="errorMsg"></p>
+</div>
+
+<audio id="bgMusic" src="Imgs/music.mp3" loop></audio>
+<!-- HI -->
+<div class="box hidden" id="welcomeBox">
+  <h1 class="bigHi">Hi nga 👋</h1>
+  <p class="subText">Easy password kuduthutano... 😏</p>
+</div>
+
+<!-- IMAGE 1 -->
+<div class="box hidden" id="imageBox1">
+  <img src="Imgs/Img1.jpg">
+  <button onclick="showFlower()">Next uh✨</button>
+</div>
+
+<!-- FLOWER QUESTION -->
+<div class="box hidden" id="flowerBox">
+  <h2>💐 Flowers?</h2>
+  <p style="margin-bottom:15px;">🥺</p>
+  <button onclick="showSecond()">seri 🌸</button>
+  <button disabled style="background:#ccc; opacity:0.7;">venam 🙈</button>
+</div>
+
+<!-- IMAGE 2 -->
+<div class="box hidden" id="imageBox2">
+  <img src="Imgs/Img2.jpg">
+  <button onclick="askGame()">seri 😌</button>
+</div>
+
+<!-- ASK GAME -->
+<div class="box hidden" id="askGameBox">
+  <h2>🎮 game veladuringala?</h2>
+  <button onclick="startGame()">okay😄</button>
+  <button onclick="skipGame()">venam 🙈</button>
+</div>
+
+<!-- GAME -->
+<div class="box hidden" id="gameBox">
+  <h2> 5 starts pudinga pakalam! 🌟</h2>
+  <div id="gameArea"></div>
+  <div id="gameMsg"></div>
+</div>
+
+<!-- PISH / MESSAGES -->
+<div class="box hidden" id="pishBox">
+  <h2 id="pishTitle">Onnu sollava...</h2>
+  <p id="pishText"></p>
+  <button id="nextBtn" class="hidden" onclick="showNextLine()">Next ✨</button>
+</div>
+
+<!-- FINAL IMAGE (PHISH PRANK END) -->
+<div class="box hidden" id="finalBox">
+  <img src="Imgs/Img3.webp">
+  <h2 style="margin-top:15px;">⚠ You Have Been Phished 😈</h2>
+  <button onclick="showCandle()" style="margin-top:15px;">Continue 🎂</button>
+</div>
+
+<!-- CANDLE BLOW BOX -->
+<div class="box hidden" id="candleBox">
+  <h2>Blow the candle! 🎂</h2>
+  <img id="candleImg" src="Imgs/litCandle.webp" style="width:150px;margin:20px auto;display:block;">
+  <p id="blowMsg">Blow! 🎂</p>
+</div>
+
+<div id="popperWrapper">
+  <div id="popperText">
+      <img id="finalImage" src="Imgs/Img7.jpg">
+      <button onclick="goToCake()" style="margin-top:20px;width:200px;">Next ➡</button>
+  </div>
+</div>
+
+<script>
+/* ======== BOX SHOW/HIDE ======== */
+function showBox(id){
+  document.querySelectorAll(".box").forEach(b=>{
+    b.classList.add("hidden");
+    b.classList.remove("show");
+  });
+  const el=document.getElementById(id);
+  el.classList.remove("hidden");
+  setTimeout(()=>{el.classList.add("show");},50);
+}
+
+/* ======== LOGIN ======== */
+function login(){
+  const correctUsername = "Jaya".toLowerCase();
+  const correctPassword = "vaaranamaayiram".toLowerCase();
+
+  const username = document.getElementById("username").value.toLowerCase().trim();
+  const password = document.getElementById("password").value.toLowerCase().trim();
+
+  if(username === correctUsername && password === correctPassword){
+    startEmojiAnimation();
+    showBox("welcomeBox");
+    setTimeout(()=>{ showBox("imageBox1"); },3000);
+
+    const music = document.getElementById("bgMusic");
+    music.play().catch(e=>{
+      console.log("Music play was prevented, user interaction required.");
+    });
+
+  }else{
+    document.getElementById("errorMsg").innerText="Oops 😅 Wrong ID or Password";
+  }
+}
+
+function showFlower(){ showBox("flowerBox"); }
+function showSecond(){ showBox("imageBox2"); }
+function askGame(){ showBox("askGameBox"); }
+
+/* ======== GAME ======== */
+let caught=0;
+let gameInterval;
+function startGame(){
+  showBox("gameBox");
+  caught=0;
+  const area=document.getElementById("gameArea");
+  area.innerHTML="";
+  const gameMsg=document.getElementById("gameMsg");
+  gameMsg.innerText="";
+  const basket=document.createElement("div");
+  basket.id="basket";
+  basket.innerText="🧺";
+  area.appendChild(basket);
+
+  let dragging=false, offsetX=0;
+  basket.addEventListener("touchstart",e=>{dragging=true;offsetX=e.touches[0].clientX-basket.offsetLeft;});
+  basket.addEventListener("touchmove",e=>{if(dragging){let x=e.touches[0].clientX-offsetX;if(x<0)x=0;if(x>area.offsetWidth-60)x=area.offsetWidth-60;basket.style.left=x+"px";}});
+  basket.addEventListener("touchend",()=>{dragging=false;});
+  basket.addEventListener("mousedown",e=>{dragging=true;offsetX=e.clientX-basket.offsetLeft;});
+  basket.addEventListener("mousemove",e=>{if(dragging){let x=e.clientX-offsetX;if(x<0)x=0;if(x>area.offsetWidth-60)x=area.offsetWidth-60;basket.style.left=x+"px";}});
+  basket.addEventListener("mouseup",()=>{dragging=false;});
+  basket.style.left="50%";
+
+  gameInterval=setInterval(()=>{
+    const star=document.createElement("div");
+    star.classList.add("star");
+    star.innerText="⭐";
+    star.style.left=Math.random()*(area.offsetWidth-30)+"px";
+    star.style.top="0px";
+    area.appendChild(star);
+    let pos=0;
+    const fall=setInterval(()=>{
+      pos+=5;
+      star.style.top=pos+"px";
+      const basketRect=basket.getBoundingClientRect();
+      const starRect=star.getBoundingClientRect();
+      if(!(basketRect.right<starRect.left || basketRect.left>starRect.right || basketRect.bottom<starRect.top || basketRect.top>starRect.bottom)){
+        caught++; star.remove();
+        if(caught>=5){ clearInterval(gameInterval); gameMsg.innerText="🎉 You caught 5 stars!"; setTimeout(showPishBox,1000);}
+      }
+      if(pos>area.offsetHeight){ star.remove(); clearInterval(fall);}
+    },50);
+  },800);
+}
+
+/* ======== SKIP GAME ======== */
+function skipGame(){
+  showBox("pishBox");
+  setTimeout(showPishBox, 500);
+}
+
+/* ======== TEXT MESSAGES ======== */
+const lines=[
+"Yena solrathu ipoo..",
+"Unga special day inaiku.. 🥺",
+"Yepovum pola santhosama irunga..😊",
+"As i said Unga kita pesitey irukanum nu dha nu thonuthuu 🥺",
+"Daily unga notification ku dha wait panran 🤣",
+"Notification varala na kastama irukum but disturb panna thonala 🤣",
+"So Pesiteyy irungaa 🙌🏽",
+"May your day be filled with love, joy, and lots of surprises! 💖",
+"You deserve all the happiness in the world. 🌸"
+];
+let currentLine=0;
+let typingInterval=null;
+
+function showPishBox(){
+  showBox("pishBox");
+  currentLine=0;
+  typeLine(lines[currentLine]);
+}
+
+function typeLine(line){
+  const textEl=document.getElementById("pishText");
+  const nextBtn=document.getElementById("nextBtn");
+
+  if(typingInterval) clearInterval(typingInterval);
+
+  textEl.textContent="";
+  nextBtn.classList.add("hidden");
+
+  let i=0;
+  typingInterval=setInterval(()=>{
+    textEl.textContent+=line.charAt(i);
+    i++;
+    if(i>=line.length){
+      clearInterval(typingInterval);
+      nextBtn.classList.remove("hidden");
+    }
+  },50);
+}
+
+function showNextLine(){
+  currentLine++;
+  if(currentLine<lines.length){
+    typeLine(lines[currentLine]);
+  }else{
+    startCountdownMoney();
+  }
+}
+
+/* ======== TERMINAL-STYLE TRANSFER ======== */
+function startCountdownMoney(){
+  const text = document.getElementById("pishText");
+  const nextBtn = document.getElementById("nextBtn");
+  nextBtn.classList.add("hidden");
+
+  text.style.backgroundColor = "#000";
+  text.style.color = "#0f0";
+  text.style.fontFamily = "Courier New, monospace";
+  text.style.padding = "15px";
+  text.style.borderRadius = "10px";
+
+  const steps = [
+    "Accessing Google Pay...",
+    "Connecting to bank server...",
+    "Initiating transfer...",
+    "Transferring money",
+    "Transfer Completed ✅"
+  ];
+
+  let i = 0;
+  let dots = 0;
+  const interval = setInterval(()=>{
+    if(i < steps.length -1){ 
+      if(steps[i].includes("Transferring money")){
+        dots = (dots +1) % 4;
+        text.innerText = steps[i] + '.'.repeat(dots);
+      }else{
+        text.innerText = steps[i];
+      }
+      i++;
+    }else{
+      clearInterval(interval);
+      setTimeout(()=>{
+        text.innerText = steps[steps.length -1];
+        setTimeout(()=>{ showBox("finalBox"); },2000);
+      },2000);
+    }
+  }, 1000);
+}
+
+/* ======== CANDLE BLOW SEQUENCE ======== */
+function showCandle(){
+  showBox("candleBox");
+
+  const candleImg = document.getElementById("candleImg");
+  const blowMsg = document.getElementById("blowMsg");
+
+  const steps = [
+    { msg: "Blow! 🎂", gif: "Imgs/Img4.gif" },
+    { msg: "Try a little harder! 💨", gif: "Imgs/Img5.gif" },
+    { msg: "Yay! 🎉 Candle blown!", gif: "Imgs/Img6.gif" }
+  ];
+
+  let index = 0;
+
+  function nextStep(){
+    const delay = Math.floor(Math.random() * 7000) + 3000;
+    candleImg.src = steps[index].gif;
+    blowMsg.innerText = steps[index].msg;
+    index++;
+    if(index < steps.length){
+      setTimeout(nextStep, delay);
+    }else{
+      setTimeout(showPopper, 2000);
+    }
+  }
+
+  nextStep();
+}
+
+/* ======== POPPER / HAPPY BIRTHDAY WITH BACKGROUND ======== */
+function showPopper(){
+  document.getElementById("candleBox").classList.add("hidden");
+  const emojiBg=document.getElementById("emojiBg");
+  emojiBg.innerHTML = ''; // stop previous emojis
+  const popperWrapper = document.getElementById("popperWrapper");
+  popperWrapper.style.display="flex"; // show background + text
+
+  // Firework effect
+  setInterval(()=>{
+    for(let i=0;i<8;i++){
+      const fw = document.createElement("div");
+      fw.className = "firework";
+      const angle = Math.random()*2*Math.PI;
+      const distance = Math.random()*150+50;
+      fw.style.setProperty("--x", Math.cos(angle)*distance+"px");
+      fw.style.setProperty("--y", Math.sin(angle)*distance+"px");
+      fw.style.left = (window.innerWidth/2 + Math.random()*50-25)+"px";
+      fw.style.top = (window.innerHeight/2 + Math.random()*50-25)+"px";
+      document.body.appendChild(fw);
+      setTimeout(()=>fw.remove(),1000);
+    }
+  },800);
+
+  // Confetti effect
+  const colors=["#ff5e99","#ffd700","#00f","#0f0","#ff4500"];
+  setInterval(()=>{
+    const conf = document.createElement("div");
+    conf.className="confetti";
+    conf.style.left = Math.random()*100+"vw";
+    conf.style.setProperty("--color", colors[Math.floor(Math.random()*colors.length)]);
+    document.body.appendChild(conf);
+    setTimeout(()=>conf.remove(),3000);
+  },200);
+}
+
+/* ======== EMOJIS ======== */
+function startEmojiAnimation(){
+  const emojis=["🎉","🥺","🎂","🥳","🥶","🌧","🌸"];
+  const emojiBg=document.getElementById("emojiBg");
+  setInterval(()=>{
+    const emoji=document.createElement("div");
+    emoji.classList.add("emoji");
+    emoji.innerText=emojis[Math.floor(Math.random()*emojis.length)];
+    const side = Math.floor(Math.random()*4);
+    if(side===0){ emoji.style.left=Math.random()*100+"vw"; emoji.style.top="-5vh"; emoji.style.transition="top 6s linear"; setTimeout(()=>{ emoji.style.top="105vh"; },50);}
+    else if(side===1){ emoji.style.left=Math.random()*100+"vw"; emoji.style.top="105vh"; emoji.style.transition="top 6s linear"; setTimeout(()=>{ emoji.style.top="-5vh"; },50);}
+    else if(side===2){ emoji.style.left="-5vw"; emoji.style.top=Math.random()*100+"vh"; emoji.style.transition="left 6s linear"; setTimeout(()=>{ emoji.style.left="105vw"; },50);}
+    else{ emoji.style.left="105vw"; emoji.style.top=Math.random()*100+"vh"; emoji.style.transition="left 6s linear"; setTimeout(()=>{ emoji.style.left="-5vw"; },50);}
+    emoji.style.fontSize=(20+Math.random()*30)+"px";
+    emojiBg.appendChild(emoji);
+    setTimeout(()=>{ emoji.remove(); },6000);
+  },500);
+}
+
+/* ---------- GO TO CAKE PAGE ---------- */
+
+function goToCake(){
+  document.getElementById("popperWrapper").style.display="none";
+  document.getElementById("cakePage").style.display="flex";
+
+  // Initialize cutting AFTER cake is visible
+  setTimeout(initCakeCutting, 100);
+}
+
+
+/* ---------- SWIPE DETECTION ---------- */
+
+/* ---------- SWIPE DETECTION (FIXED) ---------- */
+
+function initCakeCutting(){
+  const cake = document.getElementById("cake");
+  if(!cake) return;
+
+  function cutCake(){
+    cake.classList.add("break");
+
+    // Change text after cut
+    document.getElementById("wishText").innerText = "🎉 Wish Granted! Happy Birthday! 🎂";
+
+    // Small confetti burst
+    for(let i=0;i<40;i++){
+      const conf = document.createElement("div");
+      conf.className="confetti";
+      conf.style.left = Math.random()*100+"vw";
+      conf.style.setProperty("--color",
+        ["#ff5e99","#ffd700","#00f","#0f0","#ff4500"][Math.floor(Math.random()*5)]
+      );
+      document.body.appendChild(conf);
+      setTimeout(()=>conf.remove(),3000);
+    }
+
+    // --- NEW: Show Next button and final cake image after 1.5 seconds ---
+    setTimeout(()=>{
+      // Create the final image box dynamically if not exist
+      let finalBox = document.getElementById("finalCakeBox");
+      if(!finalBox){
+        finalBox = document.createElement("div");
+        finalBox.className = "box";
+        finalBox.id = "finalCakeBox";
+        finalBox.style.textAlign = "center";
+        finalBox.innerHTML = `
+          <img src="Imgs/cake_final.jpg" alt="Cake Saptu Thungunga Byee" style="width:80%; max-width:500px; border-radius:15px; margin-bottom:15px;">
+          <button onclick="alert('Bye! 🎂👋')">Finish 🎉</button>
+        `;
+        document.body.appendChild(finalBox);
+      }
+      showBox("finalCakeBox"); // show the final image box
+    },1500);
+  }
+
+  let startX = 0;
+
+  cake.addEventListener("touchstart", e=>{
+    startX = e.touches[0].clientX;
+  });
+
+  cake.addEventListener("touchend", e=>{
+    let endX = e.changedTouches[0].clientX;
+    if(Math.abs(endX - startX) > 50){
+      cutCake();
+    }
+  });
+
+  cake.addEventListener("mousedown", e=>{
+    startX = e.clientX;
+  });
+
+  cake.addEventListener("mouseup", e=>{
+    let endX = e.clientX;
+    if(Math.abs(endX - startX) > 50){
+      cutCake();
+    }
+  });
+}
+
+</script>
+
+<!-- CAKE PAGE -->
+<div id="cakePage">
+  <div class="cake" id="cake">
+      <div class="layer layer1"><div class="icing"></div></div>
+      <div class="layer layer2"><div class="icing"></div></div>
+      <div class="layer layer3"><div class="icing"></div></div>
+      <div class="candle"><div class="flame"></div></div>
+  </div>
+  <div class="swipeText">Swipe the cake 🎂</div>
+
+<div id="wishText" style="margin-top:15px;font-size:20px;color:#ff5e99;font-weight:bold;">
+  ✨ Make a wish... then swipe to cut 🎂
+</div>
+
+<!-- FINAL CAKE IMAGE -->
+<div class="box hidden" id="finalCakeBox">
+  <img src="Imgs/last.gif" alt="Cake Saptu Thungunga Byee" style="width:80%; max-width:500px; border-radius:15px;">
+  
+  <div id="wishText" style="margin-top:15px;font-size:20px;color:#ff5e99;font-weight:bold;">
+  inthanga cake saptu thungunga... train la paathu.. byee❤
+  </div>
+  <button onclick="alert('Bye!🥺')">Finish 🎉</button>
+</div>
+
+
+
+</div>
+
+</body>
+</html>
